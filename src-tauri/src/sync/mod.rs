@@ -1108,7 +1108,7 @@ mod e2e {
     fn stranger_is_rejected_with_clear_error() {
         let a = node("A", json!([board("a", "x")]));
         let b = node("B", json!([board("b", "y")]));
-        let stranger = node("Stranger", json!([]));
+        let stranger = node("Stranger", json!([board("intruder", "z")]));
         let code = a.sync.start_pairing().unwrap().code;
         b.sync.join(&code).unwrap();
 
@@ -1118,7 +1118,9 @@ mod e2e {
         stranger.sync.upsert_peer(&a_info, None);
         let err = stranger.sync.run_all(true).unwrap_err();
         assert!(err.contains("different sync group"), "{err}");
-        assert_eq!(titles(&a), vec!["a"]);
+        // B may already have synced with A in the background; what matters is
+        // that nothing from the unpaired device got in.
+        assert!(!titles(&a).contains(&"intruder".to_string()));
     }
 
     #[test]
