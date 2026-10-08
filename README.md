@@ -4,6 +4,12 @@ SPDX-FileCopyrightText: Copyright (c) 2022-2026 trobonox <hello@trobo.dev>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+> [!NOTE]
+> **This is Kanri Sync**, a fork of Kanri that adds an Android version and automatic,
+> encrypted sync between your PC, phone and tablet over your home Wi-Fi (no cloud).
+> See **[SYNC.md](SYNC.md)** for installing, pairing and how sync works.
+
+
 <p align="center">
     <img src="https://github.com/user-attachments/assets/14750ad4-a273-4779-972c-71868c2bbaa3" alt="Kanri banner" width="100%" /> <br>
     <b> Made with simplicity and user experience in mind, Kanri helps you create Kanban boards easily, right from your desktop. No internet connection or account needed. </b>

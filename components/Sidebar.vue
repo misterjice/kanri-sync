@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 
 <template>
   <nav
-    class="border-elevation-1 bg-sidebar z-10 mr-8 flex h-screen flex-col items-center justify-between overflow-hidden border-r-2 px-8 pb-6 pt-5 shadow-md"
+    class="border-elevation-1 bg-sidebar z-10 mr-8 flex h-screen flex-col items-center justify-between overflow-hidden border-r-2 px-8 pb-6 pt-5 shadow-md max-sm:mr-0 max-sm:h-auto max-sm:min-h-16 max-sm:flex-row max-sm:justify-around max-sm:border-r-0 max-sm:border-t-2 max-sm:px-2 max-sm:py-1 max-sm:pb-[max(0.25rem,env(safe-area-inset-bottom))]"
   >
     <Teleport to=".default-layout">
       <ModalNewBoard
@@ -33,8 +33,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       />
     </Teleport>
 
-    <section id="items-top" class="flex flex-col items-center gap-4">
-      <div id="logo" class="flex flex-row rounded-md">
+    <section id="items-top" class="flex flex-col items-center gap-4 max-sm:flex-row max-sm:gap-2">
+      <div id="logo" class="flex flex-row rounded-md max-sm:hidden">
         <IconKanri
           class="text-accent-logo-icon size-9 pl-1"
           @click="$router.push('/')"
@@ -75,9 +75,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       </Tooltip>
     </section>
 
-    <PinnedBar />
+    <PinnedBar class="max-sm:hidden" />
 
-    <section id="icons-bottom" class="flex flex-col items-center gap-4">
+    <section id="icons-bottom" class="flex flex-col items-center gap-4 max-sm:flex-row max-sm:gap-2">
+      <SyncButton />
       <Tooltip :label="$t('components.sidebar.importExport')">
         <template #trigger>
           <nuxt-link to="/import">

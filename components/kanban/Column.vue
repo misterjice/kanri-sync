@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
   <div
     ref="columnDOMElement"
     :class="[
-      'kanban-column bg-elevation-1 max-h-column flex flex-col rounded-lg p-2',
+      'kanban-column bg-elevation-1 max-h-column flex flex-col rounded-lg p-2 max-sm:!w-[85vw]',
       columnSizeClass,
       columnSpacingClass,
     ]"
@@ -107,6 +107,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       ]"
       drag-class="cursor-grabbing"
       drag-handle-selector=".kanbancard-drag"
+      :drag-begin-delay="touchDragDelay()"
       group-name="cards"
       orientation="vertical"
       :get-ghost-parent="getGhostParent"
@@ -213,6 +214,7 @@ import type { Card, Tag } from "@/types/kanban-types";
 import type { Ref } from "vue";
 
 import { applyDrag } from "@/utils/drag-n-drop";
+import { touchDragDelay } from "@/utils/device";
 import emitter from "@/utils/emitter";
 import { PlusIcon, EllipsisHorizontalIcon } from "@heroicons/vue/24/solid";
 //@ts-expect-error, sadly this library does not have ts typings

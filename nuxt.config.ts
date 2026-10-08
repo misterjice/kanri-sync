@@ -7,7 +7,11 @@ import license from "rollup-plugin-license";
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
-  app: { pageTransition: { mode: "out-in", name: "page" } },
+  app: {
+    pageTransition: { mode: "out-in", name: "page" },
+    // viewport-fit=cover exposes safe-area insets (status/gesture bars) on Android.
+    head: { meta: [{ name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" }] },
+  },
   css: ["@/assets/css/scrollbars.css", "@/assets/css/global.css"],
   devtools: {
     enabled: false,

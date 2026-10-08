@@ -39,10 +39,10 @@
       }
     }
   },
-  "productName": "kanri",
-  "mainBinaryName": "kanri",
+  "productName": "Kanri Sync",
+  "mainBinaryName": "kanri-sync",
   "version": "0.8.2",
-  "identifier": "tech.trobonox.kanri",
+  "identifier": "io.github.misterjice.kanrisync",
   "plugins": {},
   "app": {
     "windows": [
@@ -50,7 +50,7 @@
         "fullscreen": false,
         "height": 800,
         "resizable": true,
-        "title": "Kanri",
+        "title": "Kanri Sync",
         "width": 1400,
         "center": true,
         "visible": true

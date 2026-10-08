@@ -27,9 +27,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
     class="default-layout custom-scrollbar-hidden h-screen overflow-auto"
   >
     <div v-if="mounted">
-      <Sidebar class="fixed left-0 w-8" />
+      <!-- Vertical sidebar on desktop/tablet, bottom navigation bar on phones -->
+      <Sidebar class="fixed left-0 w-8 max-sm:inset-x-0 max-sm:bottom-0 max-sm:w-full" />
+      <SyncBanner />
     </div>
-    <div class="min-h-screen pl-16">
+    <div class="min-h-screen pl-16 max-sm:pb-20 max-sm:pl-0">
       <slot />
     </div>
   </div>
@@ -45,6 +47,7 @@ const settings = useSettingsStore();
 const theme = useThemeStore();
 const layout = useLayoutStore();
 const boards = useBoardsStore();
+const sync = useSyncStore();
 
 const systemTheme = useDark();
 
@@ -57,6 +60,7 @@ onMounted(async () => {
   await theme.loadThemeSettings();
   await layout.loadLayoutSettings();
   await boards.init();
+  await sync.init();
 
   // Set locale cookies based on saved value
   setLocale(settings.locale);
@@ -144,6 +148,8 @@ const cssVars = computed(() => {
 }
 
 .default-layout {
+  /* Keep content clear of the Android status bar (0 on desktop). */
+  padding-top: env(safe-area-inset-top);
   background-color: var(--bg-primary);
   color: var(--text);
   transition: color 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);

@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { defineStore } from "pinia";
 import type { Board, Column, Card, Tag } from "@/types/kanban-types";
 import { useTauriStore } from "@/stores/tauriStore";
+import { useSyncStore } from "@/stores/sync";
 import { generateUniqueID } from "@/utils/idGenerator";
 
 type Pin = { id: string; title: string; pinIcon?: string; pinIconText?: string };
@@ -52,12 +53,20 @@ export const useBoardsStore = defineStore("boards", {
       const tauri = useTauriStore().store;
       this.boards = (await tauri.get("boards")) || [];
     },
+    // Called when LAN sync wrote merged data from other devices to storage.
+    async reloadFromStorage() {
+      const tauri = useTauriStore().store;
+      this.boards = (await tauri.get("boards")) || [];
+      this.pins = (await tauri.get("pins")) || [];
+    },
     async save() {
       const tauri = useTauriStore().store;
       try {
         await tauri.set("boards", this.boards);
         await tauri.set("pins", this.pins);
         await tauri.save();
+        // Let LAN sync timestamp the edit and push it to other devices.
+        useSyncStore().notifyLocalChange();
       } catch (error) {
         console.error("Failed to save boards/pins:", error);
         // Consider user notification or rollback strategy

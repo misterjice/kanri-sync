@@ -9,8 +9,13 @@
     windows_subsystem = "windows"
 )]
 
+mod sync;
+
+#[cfg(desktop)]
 use tauri::Manager;
+#[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
+#[cfg(desktop)]
 use tauri_plugin_window_state::StateFlags;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -26,24 +31,47 @@ pub fn run() {
         std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
     }
 
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::new().build())
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_persisted_scope::init());
+
+    // Window management and autostart only exist on desktop.
+    #[cfg(desktop)]
+    let builder = builder
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 // Avoid restoring an accidentally hidden window on startup.
                 .with_state_flags(StateFlags::all() & !StateFlags::VISIBLE)
                 .build(),
         )
-        .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
             None,
-        ))
+        ));
+
+    // QR code scanning for pairing is only available on mobile.
+    #[cfg(mobile)]
+    let builder = builder.plugin(tauri_plugin_barcode_scanner::init());
+
+    builder
+        .invoke_handler(tauri::generate_handler![
+            sync::sync_status,
+            sync::sync_now,
+            sync::sync_local_change,
+            sync::sync_start_pairing,
+            sync::sync_stop_pairing,
+            sync::sync_join,
+            sync::sync_rename_device,
+            sync::sync_set_enabled,
+            sync::sync_forget_device,
+            sync::sync_leave_group,
+            sync::sync_clear_error,
+        ])
         .setup(|app| {
             #[cfg(desktop)]
             let _ = app
@@ -55,6 +83,9 @@ pub fn run() {
                         let _ = window.set_focus();
                     }
                 }));
+            if let Err(e) = sync::init(app.handle()) {
+                log::error!("[sync] failed to start: {e}");
+            }
             Ok(())
         })
         .run(tauri::generate_context!())

@@ -98,7 +98,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 
     <div class="bg-custom pointer-events-none absolute inset-0" :style="cssVars" />
 
-    <div class="absolute top-4 z-50 ml-8 w-[calc(100vw-112px)]">
+    <div class="absolute top-4 z-50 ml-8 w-[calc(100vw-112px)] max-sm:ml-4 max-sm:w-[calc(100vw-32px)]">
       <h1
         v-if="!boardTitleEditing"
         class="mb-1 max-h-12 w-full overflow-hidden break-words rounded-md bg-transparent py-1 pr-8 text-4xl font-bold"
@@ -124,7 +124,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         "
       >
 
-      <div class="flex w-full flex-row justify-between gap-6 xl:gap-0">
+      <div class="flex w-full flex-row justify-between gap-6 max-sm:gap-2 xl:gap-0">
         <div class="flex flex-row gap-2">
           <div class="flex flex-row gap-2">
             <button
@@ -153,7 +153,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         </div>
 
         <div class="flex flex-row items-center gap-4">
-          <KanbanZoomAdjustment />
+          <!-- Phones always use full-width columns, so zoom is hidden there. -->
+          <KanbanZoomAdjustment class="max-sm:hidden" />
 
           <Dropdown align="end">
             <template #trigger>
@@ -226,13 +227,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       class="custom-scrollbar-horizontal flex max-h-screen flex-col overflow-y-hidden"
     >
     <div class="pointer-events-none h-full w-max min-w-full pt-28">
-        <div class="pointer-events-auto z-50 pl-8">
+        <div class="pointer-events-auto z-50 pl-8 max-sm:pl-4">
           <div class="pt-4">
             <Container
               non-drag-area-selector="nodrag"
               orientation="horizontal"
               class="flex-row gap-2"
               drag-handle-selector=".dragging-handle"
+              :drag-begin-delay="touchDragDelay()"
               group-name="columns"
               :get-ghost-parent="getGhostParent"
               :get-child-payload="(index: number) => boardContent?.columns[index]"
@@ -296,6 +298,7 @@ import type { Card, Column } from "@/types/kanban-types";
 import type { Ref } from "vue";
 
 import { applyDrag } from "@/utils/drag-n-drop";
+import { touchDragDelay } from "@/utils/device";
 import emitter from "@/utils/emitter";
 
 import { PhotoIcon } from "@heroicons/vue/24/outline";
