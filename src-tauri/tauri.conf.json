@@ -23,7 +23,7 @@
       "digestAlgorithm": "sha256",
       "timestampUrl": ""
     },
-    "longDescription": "Kanban board application made for offline usage",
+    "longDescription": "Offline Kanban board app that syncs between your own devices over the local network, encrypted and without a cloud. Fork of Kanri.",
     "macOS": {
       "entitlements": null,
       "exceptionDomain": "",
@@ -32,7 +32,7 @@
       "signingIdentity": null
     },
     "resources": [],
-    "shortDescription": "Kanri",
+    "shortDescription": "Kanri Sync",
     "linux": {
       "deb": {
         "depends": []

@@ -305,7 +305,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
             {{ $t("modals.help.docs") }}
           </a>
           <a
-            href="https://github.com/trobonox/kanri/issues"
+            href="https://github.com/misterjice/kanri-sync/issues"
             target="_blank"
             class="border-elevation-3 bg-elevation-3-hover flex flex-row items-center gap-2 rounded-md border px-4 py-1.5 transition-colors duration-300"
           >

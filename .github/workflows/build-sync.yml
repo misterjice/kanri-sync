@@ -4,7 +4,8 @@
 
 # Builds Kanri Sync for Windows, Linux and Android (arm64: Galaxy S22/S26,
 # Galaxy Tab S-series). Installers are attached to each run as artifacts;
-# pushing a tag like v0.9.0 also publishes them as a GitHub release.
+# pushing a tag like v0.9.0, or a commit whose message starts with
+# "Release v", also publishes them as a GitHub release.
 #
 # Optional repository secrets for a stable Android signing key (strongly
 # recommended, otherwise every build is signed with a throwaway key and

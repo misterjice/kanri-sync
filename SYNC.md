@@ -10,25 +10,36 @@ and no server: the devices talk to each other directly.
 
 ## Installing
 
-Every push builds installers with GitHub Actions (**Actions → Build Kanri Sync → latest run →
-Artifacts**). Pushing a tag such as `v0.9.0` also publishes them as a GitHub release.
+Download the newest version from the
+**[Releases page](https://github.com/misterjice/kanri-sync/releases)** (what changed:
+[CHANGELOG.md](CHANGELOG.md)).
 
 | Device | File |
 |---|---|
-| Windows PC | `kanri-sync-windows` → `Kanri Sync_x.y.z_x64-setup.exe` |
-| Linux | `kanri-sync-linux` → `.deb` / `.AppImage` |
-| Android phone / tablet (arm64) | `kanri-sync-android` → `KanriSync-android-arm64.apk` |
+| Windows PC | `Kanri Sync_x.y.z_x64-setup.exe` (or `.msi`) |
+| Linux | `.deb` / `.AppImage` |
+| Android phone / tablet (arm64) | `KanriSync-android-arm64.apk` |
 
 On Android, open the APK and allow “install unknown apps” for your browser/file manager when asked.
+Updates install over the previous version and keep your boards and pairing.
 
 If you already use the original Kanri on the same PC, your boards are copied over automatically on
 first launch. On Android you can also bring boards over with **Import/Export**.
 
-### Stable Android signing key (do this once)
+Builds of unreleased changes are also attached to every CI run (**Actions → Build Kanri Sync →
+latest run → Artifacts**).
 
-Android only installs an update if it is signed with the same key as the installed version. Without
-the secrets below, every build gets a throwaway key and you must uninstall before installing a new
-build (your boards come back from the PC via sync, but it is annoying). To set a permanent key:
+### Publishing a release (maintainers)
+
+Bump the version in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Cargo.toml`, then
+push a commit whose message starts with `Release vX.Y.Z`. CI builds everything and creates the tag
+and GitHub release itself.
+
+### Android signing key
+
+Android only installs an update if it is signed with the same key as the installed version. This
+repository already has a permanent key stored as Actions secrets, so nothing needs doing. For a
+fork of this fork, create your own:
 
 ```sh
 keytool -genkeypair -v -keystore kanrisync.jks -alias kanrisync -keyalg RSA -keysize 2048 -validity 10000
@@ -44,7 +55,8 @@ Then in GitHub: **Settings → Secrets and variables → Actions → New reposit
 - `ANDROID_KEYSTORE_PASSWORD`: the password you chose
 - `ANDROID_KEY_ALIAS`: `kanrisync`
 
-Keep `kanrisync.jks` somewhere safe and **never commit it**.
+Keep `kanrisync.jks` somewhere safe and **never commit it**. Without these secrets every build gets
+a throwaway key and you must uninstall before installing a new build.
 
 ## Pairing (once per device)
 
@@ -116,7 +128,7 @@ Boards, columns and cards are synced individually, not as one big file, so:
 
 ## For developers
 
-- Rust sync engine: `src-tauri/src/sync/` (`doc.rs` merge model, `crypto.rs`, `net.rs` transport,
+- Rust sync engine: `src-tauri/src/sync/` (`doc.rs` merge model, `blobs.rs` background images, `crypto.rs`, `net.rs` transport,
   `discovery.rs` mDNS, `mod.rs` orchestration). Tests: `cd src-tauri && cargo test --lib sync`
   (includes end-to-end tests that pair and sync several app instances over real sockets).
 - Frontend: `stores/sync.ts`, `components/SyncButton.vue`, `components/SyncBanner.vue`, `pages/sync.vue`.

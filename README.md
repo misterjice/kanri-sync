@@ -1,34 +1,71 @@
 <!--
 SPDX-FileCopyrightText: Copyright (c) 2022-2026 trobonox <hello@trobo.dev>
+SPDX-FileCopyrightText: Copyright (c) 2026 kanri-sync contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
+# Kanri Sync
+
+**Kanri Sync** is a fork of [Kanri](https://github.com/kanriapp/kanri), the offline Kanban board
+app, that adds two things the original does not have:
+
+1. **An Android version** (phones and tablets), with a layout made for touch screens.
+2. **Automatic, encrypted sync between your own devices over your home Wi-Fi.** No cloud, no
+   account, no server: your PC, phone and tablet talk to each other directly.
+
+Everything else (boards, cards, themes, backgrounds, import/export) is Kanri as you know it.
+
+- **Download:** [Releases](https://github.com/misterjice/kanri-sync/releases) (Windows, Linux, Android)
+- **Install, pair devices, troubleshooting:** [SYNC.md](SYNC.md)
+- **What changed in each version:** [CHANGELOG.md](CHANGELOG.md)
+- **Bugs / ideas for this fork:** [Issues](https://github.com/misterjice/kanri-sync/issues). Please
+  do **not** report Kanri Sync problems to the upstream Kanri project.
+
 > [!NOTE]
-> **This is Kanri Sync**, a fork of Kanri that adds an Android version and automatic,
-> encrypted sync between your PC, phone and tablet over your home Wi-Fi (no cloud).
-> See **[SYNC.md](SYNC.md)** for installing, pairing and how sync works.
+> Development happens on the `feature/android-lan-sync` branch. `main` tracks upstream Kanri.
 
+## What this fork adds
 
-<p align="center">
-    <img src="https://github.com/user-attachments/assets/14750ad4-a273-4779-972c-71868c2bbaa3" alt="Kanri banner" width="100%" /> <br>
-    <b> Made with simplicity and user experience in mind, Kanri helps you create Kanban boards easily, right from your desktop. No internet connection or account needed. </b>
-    <br> <br>
-    <img src="https://img.shields.io/github/v/release/trobonox/kanri" alt="Release Version Badge" />
-    <br>
-    <img src="https://img.shields.io/github/license/trobonox/kanri" alt="Repo license" />
-    <img src="https://api.reuse.software/badge/github.com/trobonox/kanri" alt="Reuse status" />
-    <br>
-    <div align="center">
-        <a href="https://kanriapp.com/download">
-            <img width="180" src="https://github.com/trobonox/kanri/assets/57040351/f13c0cd7-6f6e-44e7-95ce-74282acdae51"/> 
-        </a>
-        <a href="https://discord.gg/J3TZzKAcCy">
-            <img width="180" src="https://github.com/trobonox/kanri/assets/57040351/837f5516-e996-456c-acbe-1c376b856c14"/> 
-        </a>
-    </div>
-</p>
+| Area | What was done |
+|---|---|
+| Android app | Same app built for Android (arm64): Galaxy phones and tablets. Installs from a signed APK; updates install over the old version and keep your boards and pairing. |
+| Phone layout | Bottom navigation bar, full-width columns, press-and-hold (0.5 s) to drag so swiping scrolls, a drag-free strip for sideways scrolling, dialogs and settings that fit the screen, keyboard and system bars never cover fields. Tablets and PCs keep the desktop layout. |
+| LAN sync | Changes are sent ~1.5 s after you make them, every device checks in once a minute, and the phone syncs as soon as you open the app. Devices find each other automatically (mDNS) on the same network. |
+| Smart merging | Boards, columns and cards are synced one by one, not as one file: cards added on two devices while apart are both kept; a rename on one device and a move on another both survive; deletions stick. |
+| Security | One-time QR-code pairing shares a group key; all traffic is encrypted with XChaCha20-Poly1305. Unpaired devices can neither read nor change your boards. |
+| Background pictures | Board background images are copied between devices (by content hash), so a picture set on the PC shows up on the phone and tablet. |
+| Clear status | Sync button with a coloured status dot, a red banner that stays until an error is fixed, and a Sync page with per-device status and an activity log. |
+| Side-by-side install | Own app identity (`io.github.misterjice.kanrisync`), so it installs next to the original Kanri. On first launch on a PC it copies your existing Kanri boards over. |
+| Automated builds | GitHub Actions builds Windows (`.exe`/`.msi`), Linux (`.deb`/`.AppImage`) and a signed Android APK, runs the sync test suite, and publishes releases. |
 
+### How it fits together
+
+```
+ PC (Windows) <--- encrypted HTTP, port 47613 ---> Phone (Android)
+      ^                                                  ^
+      |            same Wi-Fi, found via mDNS            |
+      +-------------------> Tablet (Android) <-----------+
+```
+
+There is no central copy: each device holds the full set of boards and merges what the others send.
+An always-on PC is a convenient meeting point, because Android pauses apps in the background.
+
+### Code added by the fork
+
+- `src-tauri/src/sync/`: Rust sync engine (`doc.rs` merge model, `blobs.rs` background images,
+  `crypto.rs`, `net.rs` transport, `discovery.rs` mDNS, `mod.rs` scheduler and app commands),
+  with unit tests and end-to-end tests that pair and sync several app instances over real sockets.
+- `stores/sync.ts`, `components/SyncButton.vue`, `components/SyncBanner.vue`, `pages/sync.vue`,
+  `utils/device.ts`: sync UI and touch/phone fixes.
+- `scripts/android-patch.mjs`: patches the generated Android project (Wi-Fi multicast for
+  discovery, permissions, keyboard handling).
+- `.github/workflows/build-sync.yml`: builds and releases.
+
+---
+
+*The rest of this page is the original Kanri README, kept for reference. Download links and
+badges below point to upstream Kanri, not to Kanri Sync.*
 
 ## Demo
 ![showcase_gif_kanri](https://github.com/user-attachments/assets/14d26751-cb5e-4164-a2f9-84e2b7dc200c)
@@ -80,6 +117,8 @@ This project is open for any contributions or feature requests as long as they a
 > This project is still in active development and is provided "AS IS". Please make regular backups/exports to prevent any data loss.
 
 ## 🛠 Contributing & Build Setup
+*(Upstream Kanri. For Kanri Sync, see "For developers" in [SYNC.md](SYNC.md); Android builds run in CI.)*
+
 If you want to contribute, please take a look at the [Contribution Guidelines](https://github.com/trobonox/kanri/blob/main/CONTRIBUTING.md).
 The `main` branch is equivalent to a `dev` branch where development is done on - submit PRs here. The `release` branch is similar to a `stable` branch with the code of latest release.
 
@@ -102,3 +141,6 @@ pnpm tauri build
 ---
 **Copyright (c) 2022-2026 trobonox (trobo@kanriapp.com)**. Licensed under GPL v3 (with some files under Apache 2.0 or other licenses stated in the files themselves).
 The Kanri logo, name and other branding are **NOT** open source, full copyright belongs to trobonox.
+
+Kanri Sync additions: Copyright (c) 2026 kanri-sync contributors, under the same licenses. Kanri Sync is
+an independent fork and is not affiliated with or endorsed by the Kanri project.
