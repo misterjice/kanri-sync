@@ -167,11 +167,26 @@ jobs:
       - uses: actions/checkout@v5
       - id: ver
         run: echo "tag=v$(jq -r .version src-tauri/tauri.conf.json)" >> "$GITHUB_OUTPUT"
-      - uses: actions/download-artifact@v4
+      # A release commit copied to another branch (e.g. feature -> main) must
+      # not rebuild and overwrite the installers of an already published release.
+      - id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || steps.ver.outputs.tag }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" > /dev/null 2>&1; then
+            echo "::notice::Release $TAG already exists; not publishing it again."
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.existing.outputs.found == 'false'
+        uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
-      - uses: softprops/action-gh-release@v2
+      - if: steps.existing.outputs.found == 'false'
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || steps.ver.outputs.tag }}
           target_commitish: ${{ github.sha }}

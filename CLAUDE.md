@@ -21,6 +21,8 @@ tablets. No cloud, no server. User-facing docs: `SYNC.md`; version history: `CHA
   `src-tauri/Cargo.toml` (+ `cargo check` to update `Cargo.lock`), then commit with a message
   starting **`Release vX.Y.Z`** and push. CI creates the tag + GitHub release itself (pushing tags
   from the cloud environment is blocked). Pushing again cancels an in-flight build on the same branch.
+  If that version's release already exists, the release job skips publishing, so a release
+  commit can be fast-forwarded to another branch without overwriting the published installers.
 - Android signing uses repo secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
   `ANDROID_KEY_ALIAS` (already set). Same key every build, so updates install in place and keep
   pairing + data. Never commit a keystore.
