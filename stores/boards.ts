@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { defineStore } from "pinia";
+import { toRaw } from "vue";
 import type { Board, Column, Card, Tag } from "@/types/kanban-types";
 import { useTauriStore } from "@/stores/tauriStore";
 import { useSyncStore } from "@/stores/sync";
@@ -305,8 +306,10 @@ export const useBoardsStore = defineStore("boards", {
       // Clone card while preserving Date objects and creating new array instances
       let copy: Card;
       if (typeof structuredClone === "function") {
-        // structuredClone preserves Date instances and performs a deep clone
-        copy = structuredClone(card);
+        // structuredClone preserves Date instances and performs a deep clone.
+        // Kanri Sync: unwrap the reactive proxy first; structuredClone throws
+        // on proxies, which made "Duplicate" silently do nothing.
+        copy = structuredClone(toRaw(card));
       } else {
         // Fallback: shallow-copy primitives and explicitly copy arrays and Date-like fields
         copy = {
