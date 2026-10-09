@@ -23,10 +23,16 @@ import type { Board } from "@/types/kanban-types";
 import type { Ref } from "vue";
 
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { normalize } from "@tauri-apps/api/path";
-import { exists } from "@tauri-apps/plugin-fs";
 
 import { getAverageColor, getContrast, rgbToHex } from "@/utils/colorUtils";
+
+const imageLoads = (src: string) =>
+  new Promise<boolean>((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src;
+  });
 
 const DEFAULT_BLUR = "8px";
 const DEFAULT_BRIGHTNESS = "100%";
@@ -114,24 +120,18 @@ export function useBackgroundImage(
       return;
     }
 
-    let bgImageExists = true;
-    if (checkFileExists) {
-      const pathTauriObject = await normalize(background.src);
-      try {
-        bgImageExists = await exists(pathTauriObject);
-      } catch (e) {
-        console.warn(
-          "Background image might not exist, might be from an imported board from another device"
-        );
-        console.info(e);
-        bgImageExists = false;
-      }
+    // Kanri Sync: check the file by loading it through the asset protocol
+    // (the same way it is displayed). The fs plugin's exists() is refused on
+    // Android for the synced-images folder, which hid every synced picture.
+    let src = "";
+    try {
+      src = convertFileSrc(background.src);
+    } catch (e) {
+      console.error("Error converting file src: ", e);
     }
 
-    if (!bgImageExists) {
-      console.warn(
-        "Background image does not exist, removing background image from board"
-      );
+    if (!src || (checkFileExists && !(await imageLoads(src)))) {
+      console.warn("Background image could not be loaded on this device");
       if (mutateBoardOnMissingFile) {
         boardContent.value.background = null;
       }
@@ -139,18 +139,16 @@ export function useBackgroundImage(
       return;
     }
 
-    try {
-      bgCustom.value = convertFileSrc(background.src);
-    } catch (e) {
-      console.error("Error converting file src: ", e);
-      bgCustom.value = "";
-    }
-
+    bgCustom.value = src;
     bgBlur.value = background.blur;
     bgBrightness.value = background.brightness;
 
     if (computeTitleColor) {
-      await refreshBoardTitleTextColor();
+      try {
+        await refreshBoardTitleTextColor();
+      } catch (e) {
+        console.warn("Could not compute board title color", e);
+      }
     }
     bgImageLoaded.value = true;
   };
@@ -161,7 +159,9 @@ export function useBackgroundImage(
     updateBoardBackground();
 
     if (computeTitleColor) {
-      await refreshBoardTitleTextColor();
+      await refreshBoardTitleTextColor().catch((e) =>
+        console.warn("Could not compute board title color", e)
+      );
     }
   };
 
