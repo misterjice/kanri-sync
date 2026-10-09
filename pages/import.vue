@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 
 <template>
-  <main id="settings" class="overflow-auto pl-8 pt-6">
+  <main id="settings" class="overflow-auto pl-8 pt-6 max-sm:px-4 max-sm:pb-24">
     <h1 class="text-4xl font-bold">
       {{ $t("pages.import.importExportHeading") }}
     </h1>
@@ -124,7 +124,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
                 <DropdownMenuContent
                   align="start"
                   :side-offset="5"
-                  class="bg-elevation-1 border-elevation-2 w-96 rounded-md border p-2"
+                  class="bg-elevation-1 border-elevation-2 w-96 max-w-full rounded-md border p-2"
                 >
                   <DropdownMenuLabel class="text-dim-3 mb-1 px-2 text-sm">
                     {{ $t("pages.import.exportTabPartialSelectPrompt") }}

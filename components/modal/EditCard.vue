@@ -27,11 +27,11 @@ limitations under the License.
     "
   >
     <template #content>
-      <div class="flex h-[40rem] w-[36rem] flex-col pl-2">
+      <div class="flex h-[40rem] w-[36rem] max-w-full flex-col pl-2 max-sm:h-auto max-sm:w-[calc(100vw-1.5rem)] max-sm:pl-0">
         <div class="mb-4">
-          <div class="flex flex-row items-start justify-between gap-12">
+          <div class="flex flex-row items-start justify-between gap-12 max-sm:gap-3">
             <div
-              class="relative -left-8 top-0 flex flex-row items-center gap-2"
+              class="relative -left-8 top-0 flex flex-row items-center gap-2 max-sm:left-0"
             >
               <div @blur="showCustomColorPopup = false">
                 <Tooltip direction="top" :label="$t('modals.editCard.tooltip')">
@@ -199,7 +199,7 @@ limitations under the License.
               <h1
                 v-if="!titleEditing"
                 :v-model="title"
-                class="text-no-overflow pointer-events-auto min-w-[64px] max-w-[475px] pr-5 text-2xl font-bold"
+                class="text-no-overflow pointer-events-auto min-w-[64px] max-w-[475px] pr-5 max-sm:max-w-full text-2xl font-bold"
                 @click="enableTitleEditing()"
               >
                 {{ title }}
@@ -209,7 +209,7 @@ limitations under the License.
                 ref="titleTextArea"
                 v-model="title"
                 v-focus
-                class="bg-elevation-2 text-normal border-accent-focus pointer-events-auto w-[450px] text-xl focus:border-2 focus:border-dotted focus:outline-none"
+                class="bg-elevation-2 text-normal border-accent-focus pointer-events-auto w-[450px] max-w-full text-xl focus:border-2 focus:border-dotted focus:outline-none"
                 maxlength="1000"
                 type="text"
                 @blur="updateTitle"

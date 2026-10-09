@@ -335,15 +335,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         </div>
         <p class="mb-2 pt-2">
           {{ $t("modals.help.copyrights", { email: "hello@trobo.dev" }) }}<br />
-          <span class="text-lg font-bold">Kanri </span>
-          <span class="text-accent-lighter">
-            {{
-              $t("modals.help.version", {
-                major: versionInfo.buildMajor,
-                minor: versionInfo.buildMinor,
-                revision: versionInfo.buildRevision,
-              })
-            }}
+          <span class="text-lg font-bold">Kanri Sync </span>
+          <span class="text-accent-lighter">v{{ appVersion }}</span>
+          <span class="text-dim-2 text-sm">
+            (based on Kanri
+            {{ versionInfo.buildMajor }}.{{ versionInfo.buildMinor }}.{{ versionInfo.buildRevision }})
           </span>
           -
           <nuxt-link
@@ -365,11 +361,14 @@ import versionInfo from "@/version_info.json";
 import { XMarkIcon } from "@heroicons/vue/24/solid";
 import { BookOpenIcon } from "@heroicons/vue/24/outline";
 import { platform } from "@tauri-apps/plugin-os";
+import { getVersion } from "@tauri-apps/api/app";
 
 const osType = ref("");
+const appVersion = ref("");
 
 onMounted(async () => {
   osType.value = platform();
+  appVersion.value = await getVersion().catch(() => "");
 });
 
 defineEmits<{

@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 
 <template>
-  <main id="settings" class="overflow-auto pl-8 pt-6">
+  <main id="settings" class="overflow-auto pl-8 pt-6 max-sm:px-4 max-sm:pb-24">
     <ModalConfirmation
       v-show="deleteBoardModalVisible"
       :close-button-text="$t('general.cancelAction')"
@@ -53,7 +53,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       <h2 class="mb-2 mt-6 text-2xl font-bold">
         {{ $t("pages.settings.sectionThemeHeading") }}
       </h2>
-      <div v-if="!theme.autoThemeEnabled" id="theme-selection" class="flex flex-row gap-4">
+      <div v-if="!theme.autoThemeEnabled" id="theme-selection" class="flex flex-row gap-4 max-sm:flex-wrap max-sm:gap-2">
         <div
           class="bg-elevation-1 bg-elevation-2-hover flex min-w-36 cursor-pointer flex-col items-center justify-center rounded-md p-2 text-xl font-semibold"
           @click="setTheme('light')"
@@ -107,7 +107,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       </button>
 
       <div class="mt-3">
-        <div class="mt-4 flex w-[48rem] flex-row items-start justify-between">
+        <div class="mt-4 flex w-[48rem] max-w-full flex-row items-start justify-between">
           <span
             class="text-lg"
           >
@@ -163,7 +163,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         $t("pages.settings.preferencesSubtext")
       }}</span>
 
-      <div class="mt-4 flex w-[48rem] flex-row items-start justify-between">
+      <div class="mt-4 flex w-[48rem] max-w-full flex-row items-start justify-between">
         <div>
           <h3 class="text-lg">
             {{ $t("pages.settings.preferencesZoomHeading") }}
@@ -175,7 +175,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         <KanbanZoomAdjustment />
       </div>
 
-      <div class="mt-4 flex w-[48rem] flex-row items-start justify-between">
+      <div class="mt-4 flex w-[48rem] max-w-full flex-row items-start justify-between">
         <div>
           <h3 class="text-lg">
             {{ $t("pages.settings.preferencesAddToTopButtonHeading") }}
@@ -195,7 +195,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         </SwitchRoot>
       </div>
 
-      <div class="mt-4 flex w-[48rem] flex-row items-start justify-between">
+      <div class="mt-4 flex w-[48rem] max-w-full flex-row items-start justify-between">
         <div>
           <h3 class="text-lg">
             {{ $t("pages.settings.preferencesDisplayNumberOfCardsHeading") }}
@@ -215,7 +215,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         </SwitchRoot>
       </div>
 
-      <div class="mt-4 flex w-[48rem] flex-row items-start justify-between">
+      <div class="mt-4 flex w-[48rem] max-w-full flex-row items-start justify-between">
         <div>
           <h3 class="text-lg">
             {{ $t("pages.settings.preferencesDefaultRelativeDueDatesHeading") }}
@@ -242,7 +242,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       </h2>
 
       <div class="flex flex-col gap-4">
-        <div class="flex w-[48rem] flex-row items-start justify-between">
+        <div class="flex w-[48rem] max-w-full flex-row items-start justify-between">
           <div>
             <h3 class="text-lg">
               {{ $t("pages.settings.languageSelectorHeading") }}
@@ -257,7 +257,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
           <LanguageSelector />
         </div>
 
-        <div class="flex w-[48rem] flex-row items-start justify-between">
+        <div class="flex w-[48rem] max-w-full flex-row items-start justify-between">
           <div>
             <h3 class="text-lg">
               {{ $t("pages.settings.miscellaneousAnimationsHeading") }}
@@ -277,7 +277,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
           </SwitchRoot>
         </div>
 
-        <div class="flex w-[48rem] flex-row items-start justify-between">
+        <div class="flex w-[48rem] max-w-full flex-row items-start justify-between">
           <div>
             <h3 class="text-lg">
               {{ $t("pages.settings.miscellaneousDisableSpellcheckHeading") }}
@@ -298,7 +298,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
         </div>
 
         <!-- Launch-on-login only exists on desktop. -->
-        <div v-if="!isMobile" class="flex w-[48rem] flex-row items-start justify-between">
+        <div v-if="!isMobile" class="flex w-[48rem] max-w-full flex-row items-start justify-between">
           <div>
             <h3 class="text-lg">
               {{ $t("pages.settings.miscellaneousAutostartHeading") }}
@@ -318,8 +318,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
           </SwitchRoot>
         </div>
 
-        <div class="flex w-[48rem] flex-row items-start justify-between">
-          <div class="mb-8 flex w-[48rem] flex-row items-start justify-between">
+        <div class="flex w-[48rem] max-w-full flex-row items-start justify-between">
+          <div class="mb-8 flex w-[48rem] max-w-full flex-row items-start justify-between">
             <div>
               <h3 class="text-lg">
                 {{ $t("pages.settings.miscellaneousDeleteAllDataHeading") }}

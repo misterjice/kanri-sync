@@ -21,7 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 <template>
   <Modal :click-outside-to-close="true" @closeModal="$emit('closeModal')">
     <template #content>
-      <main class="h-[36rem] min-w-[32rem] max-w-3xl overflow-auto">
+      <main class="h-[36rem] max-sm:h-auto min-w-[32rem] max-sm:min-w-0 max-sm:w-[calc(100vw-2rem)] max-w-3xl overflow-auto">
         <div class="flex flex-row items-start justify-between">
           <div class="flex flex-col gap-1">
             <h1 class="pointer-events-auto pr-5 text-2xl font-bold">
