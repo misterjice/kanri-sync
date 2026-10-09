@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Builds Kanri Sync for Windows, Linux and Android (arm64: Galaxy S22/S26,
-# Galaxy Tab S-series). Installers are attached to each run as artifacts;
+# Builds Kanri Sync for Windows, Linux and Android (arm64 phones and
+# tablets). Installers are attached to each run as artifacts;
 # pushing a tag like v0.9.0, or a commit whose message starts with
 # "Release v", also publishes them as a GitHub release.
 #

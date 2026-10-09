@@ -29,7 +29,7 @@ Everything else (boards, cards, themes, backgrounds, import/export) is Kanri as 
 
 | Area | What was done |
 |---|---|
-| Android app | Same app built for Android (arm64): Galaxy phones and tablets. Installs from a signed APK; updates install over the old version and keep your boards and pairing. |
+| Android app | Same app built for Android (arm64 phones and tablets). Installs from a signed APK; updates install over the old version and keep your boards and pairing. |
 | Phone layout | Bottom navigation bar, full-width columns, press-and-hold (0.5 s) to drag so swiping scrolls, a drag-free strip for sideways scrolling, dialogs and settings that fit the screen, keyboard and system bars never cover fields. Tablets and PCs keep the desktop layout. |
 | LAN sync | Changes are sent ~1.5 s after you make them, every device checks in once a minute, and the phone syncs as soon as you open the app. Devices find each other automatically (mDNS) on the same network. |
 | Smart merging | Boards, columns and cards are synced one by one, not as one file: cards added on two devices while apart are both kept; a rename on one device and a move on another both survive; deletions stick. |

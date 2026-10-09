@@ -5,12 +5,12 @@
 # Kanri Sync: project briefing
 
 Fork of [kanriapp/kanri](https://github.com/kanriapp/kanri) (Tauri v2 + Nuxt 4 / Vue 3 kanban app)
-that adds an **Android build** and **encrypted peer-to-peer LAN sync** between the owner's
-Windows PC, Galaxy S22/S26 phone and Galaxy Tab. No cloud, no server. User-facing docs: `SYNC.md`.
+that adds an **Android build** and **encrypted peer-to-peer LAN sync** between a PC, phones and
+tablets. No cloud, no server. User-facing docs: `SYNC.md`; version history: `CHANGELOG.md`.
 
-## Owner / working style
-- Not a developer. Give short, numbered, click-by-click steps; no jargon. Windows PC.
-- Ship fixes as releases they can install; they test on real devices and send screenshots.
+## Working style
+- Ship fixes as installable releases; they are tested on real devices.
+- Add an entry to `CHANGELOG.md` for every release.
 
 ## Branches and releases
 - Work on **`feature/android-lan-sync`**. `main` is still upstream Kanri (never merged).
