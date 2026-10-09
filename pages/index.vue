@@ -396,7 +396,13 @@ const getSortedBoards = (boards: Board[], sortingOption: string, reverseSort: bo
 
 const createNewBoard = async (title: string, columns?: Column[]) => {
   const board: Board = {
-    columns: columns || exampleColumns.map((column) => ({ ...column, id: generateUniqueID() })),
+    // Kanri Sync: deep-copy the template so new boards don't share card lists
+    // (and so cards get their own ids).
+    columns: columns || exampleColumns.map((column) => ({
+      ...column,
+      id: generateUniqueID(),
+      cards: column.cards.map((card) => ({ ...JSON.parse(JSON.stringify(card)), id: generateUniqueID() })),
+    })),
     id: generateUniqueID(),
     lastEdited: new Date(),
     createdAt: new Date(),

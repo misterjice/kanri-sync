@@ -57,6 +57,11 @@ tablets. No cloud, no server. User-facing docs: `SYNC.md`; version history: `CHA
 - Touch: drag starts after a 500ms hold (`touchDragDelay`); `v-dragscroll` is disabled on touch.
 - smooth-dnd puts `touch-action: none` on `<body>` at touchstart and only clears it on mouseup;
   `installTouchFixes()` (utils/device.ts) clears it on touchend, or touch scrolling dies.
+- `structuredClone()` throws on Vue/Pinia reactive proxies: use `toRaw()` first.
+- Sync keys columns/cards by id: anything that copies boards/columns/cards must assign new ids
+  (`normalize_ids` in doc.rs also repairs duplicates). Code that writes boards straight to the
+  Tauri store (imports) must call `boardsStore.reloadFromStorage()` + notify sync
+  (`finishImport()` in pages/import.vue), or the next autosave overwrites it.
 - Keyboard: Android 15+ edge-to-edge doesn't resize for the IME; MainActivity (android-patch.mjs)
   pads content by the IME inset. Don't push docs-only commits while a release build runs (it
   cancels it).
@@ -68,6 +73,8 @@ mkdir -p .output/public && (cd src-tauri && cargo test --lib sync && cargo clipp
 pnpm generate            # frontend build
 ```
 Linux build deps for cargo: `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev`.
+A click-through test harness (fake Tauri backend + Playwright scripts for every feature, PC/phone/
+tablet viewports) was used for v0.9.8; rebuild it the same way if a broad regression check is needed.
 For UI checks without a device: serve `.output/public` and screenshot with Playwright at 412x915
 (phone) / 915x412 (landscape), mocking `window.__TAURI_INTERNALS__.invoke` (make
 `plugin:autostart|*` throw, like real Android). Pre-existing upstream lint/type errors exist in

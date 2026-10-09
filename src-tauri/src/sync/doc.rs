@@ -151,29 +151,46 @@ pub struct StoreData {
     pub pins: Value,
 }
 
-/// Ensures every board, column and card has a string id. Returns true when
-/// ids were added and the caller must write the data back to the store.
+/// Ensures every board, column and card has a string id that is unique
+/// among its kind. Returns true when ids were changed and the caller must
+/// write the data back to the store.
+///
+/// Duplicates happen in practice: Kanri's "Duplicate board" copies the
+/// column and card ids. Sync keys entities by id, so without this the copy
+/// and the original would fight over the same columns and cards. The first
+/// occurrence keeps its id; later ones get fresh ids.
 pub fn normalize_ids(data: &mut StoreData, mut gen: impl FnMut() -> String) -> bool {
     let mut changed = false;
-    let mut ensure = |obj: &mut Map<String, Value>, changed: &mut bool| {
-        let ok = matches!(obj.get("id"), Some(Value::String(s)) if !s.is_empty());
-        if !ok {
-            obj.insert("id".into(), Value::String(gen()));
-            *changed = true;
+    let mut seen: [HashSet<String>; 3] = Default::default();
+    let mut ensure = |obj: &mut Map<String, Value>, kind: usize, changed: &mut bool| {
+        let current = match obj.get("id") {
+            Some(Value::String(s)) if !s.is_empty() => Some(s.clone()),
+            _ => None,
+        };
+        if let Some(id) = current {
+            if seen[kind].insert(id) {
+                return;
+            }
         }
+        let mut id = gen();
+        while !seen[kind].insert(id.clone()) {
+            id = gen();
+        }
+        obj.insert("id".into(), Value::String(id));
+        *changed = true;
     };
     if let Value::Array(boards) = &mut data.boards {
         for b in boards.iter_mut() {
             let Some(b) = b.as_object_mut() else { continue };
-            ensure(b, &mut changed);
+            ensure(b, 0, &mut changed);
             let Some(Value::Array(cols)) = b.get_mut("columns") else { continue };
             for c in cols.iter_mut() {
                 let Some(c) = c.as_object_mut() else { continue };
-                ensure(c, &mut changed);
+                ensure(c, 1, &mut changed);
                 let Some(Value::Array(cards)) = c.get_mut("cards") else { continue };
                 for k in cards.iter_mut() {
                     if let Some(k) = k.as_object_mut() {
-                        ensure(k, &mut changed);
+                        ensure(k, 2, &mut changed);
                     }
                 }
             }
@@ -631,6 +648,29 @@ mod tests {
         let mut d = base();
         d.boards[0]["lastEdited"] = json!("2026-01-01T00:00:00.000Z");
         assert!(!a.stamp(&d, &mut ca, 5000));
+    }
+
+    #[test]
+    fn normalize_makes_duplicated_ids_unique() {
+        let board = json!({ "id": "b1", "title": "B", "columns": [
+            { "id": "c1", "title": "C", "cards": [{ "id": "k1", "name": "x" }] } ] });
+        let mut copy = board.clone();
+        copy["id"] = json!("b2");
+        let mut d = StoreData { boards: json!([board, copy]), pins: json!([]) };
+        let mut n = 0;
+        assert!(normalize_ids(&mut d, || { n += 1; format!("new{n}") }));
+        assert_eq!(d.boards[0]["columns"][0]["id"], json!("c1"));
+        assert_eq!(d.boards[0]["columns"][0]["cards"][0]["id"], json!("k1"));
+        assert_ne!(d.boards[1]["columns"][0]["id"], json!("c1"));
+        assert_ne!(d.boards[1]["columns"][0]["cards"][0]["id"], json!("k1"));
+        // Both boards keep their own column and card after a sync round trip.
+        let mut doc = SyncDoc::default();
+        let mut clock = Clock::default();
+        doc.stamp(&d, &mut clock, 1);
+        let out = doc.render(&StoreData::default());
+        assert_eq!(out.boards[0]["columns"][0]["cards"].as_array().unwrap().len(), 1);
+        assert_eq!(out.boards[1]["columns"][0]["cards"].as_array().unwrap().len(), 1);
+        assert!(!normalize_ids(&mut d, || unreachable!()));
     }
 
     #[test]

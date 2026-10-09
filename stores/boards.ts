@@ -103,6 +103,12 @@ export const useBoardsStore = defineStore("boards", {
       
       const copy: Board = JSON.parse(JSON.stringify(b));
       copy.id = generateUniqueID();
+      // Kanri Sync: columns and cards need their own ids too, or sync treats
+      // them as the same items as the original board's.
+      for (const col of copy.columns) {
+        col.id = generateUniqueID();
+        for (const card of col.cards) card.id = generateUniqueID();
+      }
       copy.title = `${copy.title} (duplicate)`;
       copy.lastEdited = new Date();
       copy.createdAt = new Date();
@@ -374,6 +380,8 @@ export const useBoardsStore = defineStore("boards", {
       if (!sourceCol || !targetCol) return;
 
       const cardIndex = sourceCol.cards.findIndex(c => c.id === cardId);
+      // Kanri Sync: splice(-1) would move the column's last card instead.
+      if (cardIndex === -1) return;
 
       const [card] = sourceCol.cards.splice(cardIndex, 1);
       if (card === undefined) return;

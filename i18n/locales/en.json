@@ -45,7 +45,7 @@
     },
     "settings": {
       "deleteAllDataConfirmationAction": "Delete Data",
-      "deleteAllDataConfirmationDescription": "Delete all data?",
+      "deleteAllDataConfirmationDescription": "Delete all data? If sync is on, the boards are also deleted on every device synced with this one.",
       "deleteAllDataConfirmationHeading": "Delete ALL Data?",
       "settingsHeading": "Settings",
       "settingsHeadingSubtext": "Change the behaviour of the application here.",
@@ -79,7 +79,7 @@
       "miscellaneousAutostartSubtext": "Automatically starts Kanri at startup.",
       "miscellaneousDeleteAllDataHeading": "Delete all data (themes and boards)",
       "miscellaneousDeleteAllDataSubtextRed": "Caution!",
-      "miscellaneousDeleteAllDataSubtext": " This will irreversibly delete all of your data!",
+      "miscellaneousDeleteAllDataSubtext": " This will irreversibly delete all of your data, including on devices synced with this one!",
       "miscellaneousDisableSpellcheckHeading": "Disable spellchecking",
       "miscellaneousDisableSpellcheckSubtext": "Disables the built-in spellchecking functionality in all input fields.",
       "exportThemeDialogTitle": "Select file to export data to",

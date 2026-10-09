@@ -8,6 +8,19 @@ Changes made in this fork on top of [Kanri](https://github.com/kanriapp/kanri) 0
 Installers for each version are on the [Releases](https://github.com/misterjice/kanri-sync/releases)
 page. How to install and pair devices: [SYNC.md](SYNC.md).
 
+## v0.9.8 (2026-10-09)
+Full check of every feature on PC, phone and tablet. Fixed:
+- **Duplicate card** did nothing (also affected the original Kanri).
+- **Duplicate board**: the copy shared its columns and cards with the original, so after a sync
+  the two boards could take each other's cards. Copies now get their own ids, and the sync engine
+  repairs any duplicated ids it finds (e.g. from older copies or importing the same board twice).
+- **New board with example columns**: boards made this way shared one card list, so a card added
+  to one showed up in the others.
+- **Import** (Kanri board, Trello, GitHub Project): imported boards did not appear until a restart
+  and the next edit wiped them. They now appear at once and are synced.
+- **Move to**: could move the wrong card if the card had just been changed on another device.
+- "Delete all data" now warns that it also deletes the boards on synced devices.
+
 ## v0.9.7 (2026-10-09)
 - Pop-up windows (e.g. **Edit tags**) no longer slide under the phone's status bar or navigation
   bar; their last rows can be scrolled into view.

@@ -166,6 +166,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 import type { Board, Column, Tag, Card } from "@/types/kanban-types";
 
 import { useTauriStore } from "@/stores/tauriStore";
+import { useBoardsStore } from "@/stores/boards";
+import { useSyncStore } from "@/stores/sync";
 import {
   kanbanElectronJsonSchema,
   kanriBoardSchema,
@@ -181,6 +183,15 @@ import { ZodError, z } from "zod";
 const router = useRouter();
 
 const store = useTauriStore().store;
+
+// Kanri Sync: imports write straight to storage. Save it, load it into the
+// open app (otherwise the next edit overwrites the import) and tell sync.
+const boardsStore = useBoardsStore();
+const finishImport = async () => {
+  await store.save();
+  await boardsStore.reloadFromStorage();
+  useSyncStore().notifyLocalChange();
+};
 const globalSettingsStore = useSettingsStore();
 const theme = useThemeStore();
 
@@ -369,6 +380,7 @@ const importFromKanriFull = async () => {
   await message(t("pages.import.importSuccessFull"), { kind: "info" });
 
   // Manual refresh
+  await finishImport();
   router.go(0);
 };
 
@@ -448,6 +460,7 @@ const importFromKanbanElectronFull = async () => {
   await message(t("pages.import.importSuccessPartial"), { kind: "info" });
 
   // Manual refresh
+  await finishImport();
   router.go(0);
 };
 
@@ -525,6 +538,7 @@ const importFromKanriBoard = async () => {
   if (convertedBoards.length === 0) return;
 
   await store.set("boards", convertedBoards);
+  await finishImport();
 
   await message(t("pages.import.importSuccessPartial"), { kind: "info" });
 };
@@ -609,6 +623,7 @@ const importFromTrelloBoard = async () => {
   if (convertedBoards.length === 0) return;
 
   await store.set("boards", convertedBoards);
+  await finishImport();
 
   await message(t("pages.import.importSuccessPartial"), { kind: "info" });
 
@@ -852,6 +867,7 @@ const importFromGithubProject = async () => {
   }
 
   await store.set("boards", convertedBoards);
+  await finishImport();
   await message(t("pages.import.importSuccessGithub"), { kind: "info" });
 };
 </script>
