@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       @click.self="clickOutsideClose ? $emit('closeModal') : () => {}"
     >
       <div
-        class="bg-elevation-1 min-h-content min-w-content max-h-[100dvh] max-w-[100vw] overflow-y-auto overscroll-contain rounded-md py-4 pl-8 pr-6 shadow-lg max-sm:px-3"
+        class="bg-elevation-1 min-h-content min-w-content max-h-full max-w-full overflow-y-auto overscroll-contain rounded-md py-4 pl-8 pr-6 shadow-lg max-sm:px-3"
       >
         <slot class="p-4" name="content" />
       </div>
@@ -105,6 +105,17 @@ const keyDownListener = (e: { key: string }) => {
   right: 0;
   bottom: 0;
   left: 0;
+  /* Keep dialogs clear of the phone's status bar and navigation bar so the
+     whole dialog can be scrolled into view. */
+  padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+}
+
+@media (max-width: 639px) {
+  .modal {
+    padding-top: max(2.5rem, env(safe-area-inset-top));
+    padding-bottom: max(3.5rem, env(safe-area-inset-bottom));
+  }
 }
 
 .z-huge {
