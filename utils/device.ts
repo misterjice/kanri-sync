@@ -8,7 +8,7 @@ export const isTouchDevice = (): boolean =>
   typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches === true;
 
 /**
- * Delay before a touch turns into a drag. Without it, swiping to scroll
- * the board would grab cards and columns instead.
+ * Delay before a touch turns into a drag (press and hold to pick up a card
+ * or column). Any movement before then is treated as a scroll instead.
  */
-export const touchDragDelay = (): number => (isTouchDevice() ? 350 : 0);
+export const touchDragDelay = (): number => (isTouchDevice() ? 500 : 0);

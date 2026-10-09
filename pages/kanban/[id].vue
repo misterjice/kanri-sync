@@ -223,7 +223,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 
     <div
       id="kanban-cols-container"
-      v-dragscroll:nochilddrag
+      v-dragscroll:nochilddrag="!isTouchDevice()"
       class="custom-scrollbar-horizontal flex max-h-screen flex-col overflow-y-hidden"
     >
     <div class="pointer-events-none h-full w-max min-w-full pt-28">
@@ -298,7 +298,7 @@ import type { Card, Column } from "@/types/kanban-types";
 import type { Ref } from "vue";
 
 import { applyDrag } from "@/utils/drag-n-drop";
-import { touchDragDelay } from "@/utils/device";
+import { isTouchDevice, touchDragDelay } from "@/utils/device";
 import emitter from "@/utils/emitter";
 
 import { PhotoIcon } from "@heroicons/vue/24/outline";

@@ -102,7 +102,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
     <Container
       :get-child-payload="getChildPayload"
       :class="[
-        'max-h-65vh custom-scrollbar mt-2 overflow-y-auto rounded-sm',
+        'max-h-65vh custom-scrollbar mt-2 overflow-y-auto rounded-sm max-sm:max-h-none max-sm:min-h-0',
         containerSpacingClass,
       ]"
       drag-class="cursor-grabbing"
@@ -795,6 +795,16 @@ const getGhostParent = () => {
 <style scoped>
 .max-h-column {
   max-height: calc(90vh - 100px);
+}
+
+/* Phones: keep a tall empty strip between the columns and the bottom menu
+   (~140px) so a sideways swipe there scrolls the board instead of grabbing
+   a card or column. 340px = board header + swipe strip + bottom menu. */
+@media (max-width: 639px) {
+  .max-h-column {
+    max-height: calc(100vh - 340px);
+    max-height: calc(100dvh - 340px);
+  }
 }
 
 .stop-text-overflow {
