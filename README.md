@@ -23,7 +23,7 @@ Everything else (boards, cards, themes, backgrounds, import/export) is Kanri as 
   do **not** report Kanri Sync problems to the upstream Kanri project.
 
 > [!NOTE]
-> Development happens on the `feature/android-lan-sync` branch. `main` tracks upstream Kanri.
+> The `main` branch contains Kanri Sync. The original Kanri lives at [kanriapp/kanri](https://github.com/kanriapp/kanri).
 
 ## What this fork adds
 

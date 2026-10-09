@@ -13,7 +13,8 @@ tablets. No cloud, no server. User-facing docs: `SYNC.md`; version history: `CHA
 - Add an entry to `CHANGELOG.md` for every release.
 
 ## Branches and releases
-- Work on **`feature/android-lan-sync`**. `main` is still upstream Kanri (never merged).
+- Work on **`main`**; it contains all Kanri Sync work and is what the GitHub front page shows.
+  `feature/android-lan-sync` is the earlier working branch (identical to `main` as of v0.9.7).
 - CI: `.github/workflows/build-sync.yml` builds Windows (.exe/.msi), Linux (.deb/.AppImage) and a
   signed arm64 APK on every push to `main` / `feature/**`.
 - **To publish a release:** bump the version in `package.json`, `src-tauri/tauri.conf.json` and
