@@ -55,12 +55,23 @@ const mounted = ref(false);
 const { colors: savedColors, autoThemeEnabled } = toRefs(theme)
 
 onMounted(async () => {
-  // Load settings into pinia stores
-  await settings.loadSettings();
-  await theme.loadThemeSettings();
-  await layout.loadLayoutSettings();
-  await boards.init();
-  await sync.init();
+  // Load settings into pinia stores. Each step is isolated so that one
+  // failing (e.g. a desktop-only feature on Android) cannot stop the rest of
+  // the app, including the navigation bar and sync, from starting.
+  const steps = [
+    ["settings", () => settings.loadSettings()],
+    ["theme", () => theme.loadThemeSettings()],
+    ["layout", () => layout.loadLayoutSettings()],
+    ["boards", () => boards.init()],
+    ["sync", () => sync.init()],
+  ];
+  for (const [name, step] of steps) {
+    try {
+      await step();
+    } catch (e) {
+      console.error(`Startup step "${name}" failed`, e);
+    }
+  }
 
   // Set locale cookies based on saved value
   setLocale(settings.locale);

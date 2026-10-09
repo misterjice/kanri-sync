@@ -39,6 +39,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
       $t("pages.settings.settingsHeadingSubtext")
     }}</span>
 
+    <section id="sync-settings">
+      <h2 class="mb-2 mt-6 text-2xl font-bold">Sync</h2>
+      <nuxt-link
+        to="/sync"
+        class="bg-elevation-1 bg-elevation-2-hover inline-flex flex-row items-center gap-2 rounded-md px-4 py-2 font-semibold"
+      >
+        Sync &amp; pair devices
+      </nuxt-link>
+    </section>
+
     <section id="theme-settings">
       <h2 class="mb-2 mt-6 text-2xl font-bold">
         {{ $t("pages.settings.sectionThemeHeading") }}
@@ -287,7 +297,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
           </SwitchRoot>
         </div>
 
-        <div class="flex w-[48rem] flex-row items-start justify-between">
+        <!-- Launch-on-login only exists on desktop. -->
+        <div v-if="!isMobile" class="flex w-[48rem] flex-row items-start justify-between">
           <div>
             <h3 class="text-lg">
               {{ $t("pages.settings.miscellaneousAutostartHeading") }}
@@ -353,7 +364,9 @@ import { message, open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 
 import { useI18n } from "vue-i18n";
+import { platform } from "@tauri-apps/plugin-os";
 
+const isMobile = ["android", "ios"].includes(platform());
 const router = useRouter();
 
 const globalSettingsStore = useSettingsStore();

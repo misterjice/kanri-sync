@@ -61,7 +61,8 @@ export const useSettingsStore = defineStore("settings", {
 
       const localeSaved: string = await store.get("locale") ?? "en";
       const animationsEnabledSaved: boolean = await store.get("animationsEnabled") ?? true;
-      const autostartEnabledSaved: boolean = await isEnabled() ?? false;
+      // Autostart only exists on desktop; on Android the plugin is absent.
+      const autostartEnabledSaved: boolean = await isEnabled().catch(() => false) ?? false;
 
       const columnZoomLevelSaved: number = await store.get("columnZoomLevel") ?? 0;
       const addToTopOfColumnButtonEnabledSaved: boolean = await store.get("addToTopOfColumnButtonEnabled") ?? false;
@@ -128,8 +129,12 @@ export const useSettingsStore = defineStore("settings", {
       this.autostartEnabled = value;
 
       // set using tauri plugin, not saving in store
-      if (value) await enable();
-      else await disable();
+      try {
+        if (value) await enable();
+        else await disable();
+      } catch (e) {
+        console.warn("Autostart not available on this platform", e);
+      }
     },
 
     async setDisableSpellcheck(value: boolean) {
