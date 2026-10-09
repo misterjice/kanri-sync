@@ -41,7 +41,7 @@
   },
   "productName": "Kanri Sync",
   "mainBinaryName": "kanri-sync",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "identifier": "io.github.misterjice.kanrisync",
   "plugins": {},
   "app": {

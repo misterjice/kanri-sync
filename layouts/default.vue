@@ -38,6 +38,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. -->
 </template>
 
 <script setup>
+import { installTouchFixes } from "@/utils/device";
 import { hslToHex, rgbToHsl } from "@/utils/colorUtils";
 import { dark } from "@/utils/themes";
 
@@ -55,6 +56,8 @@ const mounted = ref(false);
 const { colors: savedColors, autoThemeEnabled } = toRefs(theme)
 
 onMounted(async () => {
+  installTouchFixes();
+
   // Load settings into pinia stores. Each step is isolated so that one
   // failing (e.g. a desktop-only feature on Android) cannot stop the rest of
   // the app, including the navigation bar and sync, from starting.

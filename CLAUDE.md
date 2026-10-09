@@ -50,6 +50,11 @@ Windows PC, Galaxy S22/S26 phone and Galaxy Tab. No cloud, no server. User-facin
 - `@tauri-apps/plugin-barcode-scanner` (JS) must match the Rust crate's major.minor, or
   `tauri build` fails.
 - Touch: drag starts after a 500ms hold (`touchDragDelay`); `v-dragscroll` is disabled on touch.
+- smooth-dnd puts `touch-action: none` on `<body>` at touchstart and only clears it on mouseup;
+  `installTouchFixes()` (utils/device.ts) clears it on touchend, or touch scrolling dies.
+- Keyboard: Android 15+ edge-to-edge doesn't resize for the IME; MainActivity (android-patch.mjs)
+  pads content by the IME inset. Don't push docs-only commits while a release build runs (it
+  cancels it).
 
 ## Verify before pushing
 ```sh
@@ -65,7 +70,7 @@ For UI checks without a device: serve `.output/public` and screenshot with Playw
 
 ## Open items / ideas
 - Import/Export (file dialogs) on Android is untested; advise doing it on the PC.
-- On-screen keyboard over pop-ups on phone/tablet: owner is testing.
+- On-screen keyboard fix (v0.9.4) needs confirmation on real devices.
 - If a sync arrives while the card editor is open, edits after the reload can be lost (rare).
 - Optional: prefer 192.168.x addresses and skip virtual adapters (WSL/Hyper-V/Docker/VPN) when
   advertising sync addresses.

@@ -57,12 +57,24 @@ writeFileSync(
 import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : TauriActivity() {
   private var multicastLock: WifiManager.MulticastLock? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    // Android 15+ draws apps edge-to-edge and no longer shrinks them when the
+    // on-screen keyboard opens, so text fields end up hidden behind it. Pad
+    // the content by the keyboard height so the web view resizes above it.
+    val content = findViewById<View>(android.R.id.content)
+    ViewCompat.setOnApplyWindowInsetsListener(content) { v, insets ->
+      val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+      v.setPadding(0, 0, 0, ime.bottom)
+      insets
+    }
     // Kanri Sync finds other devices with mDNS; Android drops multicast
     // packets unless an app holds this lock.
     try {
