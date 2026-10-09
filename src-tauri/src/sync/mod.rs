@@ -9,6 +9,7 @@
 //! other (PC <-> phone, phone <-> tablet, ...); there is no central server.
 //! Board data never leaves the local network.
 
+mod blobs;
 mod crypto;
 mod discovery;
 pub mod doc;
@@ -181,6 +182,7 @@ pub struct Sync<R: Runtime> {
     /// Kanri's store file, as passed to the store plugin. Relative paths
     /// resolve to the app data directory, exactly like the frontend's.
     store_path: PathBuf,
+    blobs: blobs::Blobs,
     cfg: Mutex<Config>,
     data: Mutex<DocState>,
     rt: Mutex<RuntimeState>,
@@ -393,10 +395,62 @@ impl<R: Runtime> Sync<R> {
         if doc::normalize_ids(&mut data, || crypto::random_id(12)) {
             self.write_store(&data)?;
         }
-        if st.doc.stamp(&data, &mut st.clock, now_ms()) {
+        let mut portable = data.clone();
+        self.blobs.to_portable(&mut portable);
+        if st.doc.stamp(&portable, &mut st.clock, now_ms()) {
             self.persist_doc(st);
         }
         Ok(data)
+    }
+
+    /// Background images the current document uses that this device lacks.
+    fn missing_blobs(&self) -> std::collections::BTreeSet<(String, String)> {
+        let st = self.data.lock().unwrap();
+        let rendered = st.doc.render(&StoreData::default());
+        self.blobs.missing(rendered.boards.as_array().map(Vec::as_slice).unwrap_or(&[]))
+    }
+
+    /// Points boards at background images that have arrived since the last render.
+    fn resolve_blob_paths(&self) -> Result<(), String> {
+        let _st = self.data.lock().unwrap();
+        let local = self.read_store()?;
+        let mut updated = local.clone();
+        self.blobs.to_local(&mut updated);
+        if updated != local {
+            self.write_store(&updated)?;
+        }
+        Ok(())
+    }
+
+    /// Downloads missing background images from a peer. Failures are only
+    /// logged: the peer may not have the image either.
+    fn fetch_blobs(&self, addr: &str, key: &crypto::Key) {
+        let missing = self.missing_blobs();
+        if missing.is_empty() {
+            return;
+        }
+        let mut got = 0;
+        for (hash, ext) in missing {
+            let req = net::BlobRequest { hash: hash.clone(), ext: ext.clone() };
+            match net::call::<_, net::BlobResponse>(addr, "/blob", key, &req) {
+                Ok(resp) => {
+                    use base64::Engine;
+                    let bytes = base64::engine::general_purpose::STANDARD.decode(resp.data).unwrap_or_default();
+                    match self.blobs.write(&hash, &ext, &bytes) {
+                        Ok(()) => got += 1,
+                        Err(e) => self.log("warn", format!("Background image: {e}")),
+                    }
+                }
+                Err(e) => log::info!("[sync] background {hash} not available from {addr}: {e}"),
+            }
+        }
+        if got > 0 {
+            if let Err(e) = self.resolve_blob_paths() {
+                self.log("error", format!("Applying background images failed: {e}"));
+            } else {
+                self.log("info", format!("Received {got} background image(s)"));
+            }
+        }
     }
 
     fn stamp_local(&self) -> Result<String, String> {
@@ -414,6 +468,7 @@ impl<R: Runtime> Sync<R> {
         let changed = st.doc.merge(remote);
         if changed {
             let mut after = st.doc.render(&before);
+            self.blobs.to_local(&mut after);
             SyncDoc::touch_changed_boards(&before, &mut after, &now_iso());
             if after != before {
                 self.write_store(&after)?;
@@ -461,6 +516,7 @@ impl<R: Runtime> Sync<R> {
                             net::call::<_, SyncResponse>(addr, "/sync", key, &push)?;
                         }
                     }
+                    self.fetch_blobs(addr, key);
                     return Ok(changed);
                 }
                 Err(CallError::Unreachable(e)) => last_unreachable = format!("{addr}: {e}"),
@@ -579,6 +635,7 @@ impl<R: Runtime> Sync<R> {
         let result = match inc.path.as_str() {
             "/sync" => self.handle_sync(&inc),
             "/pair" => self.handle_pair(&inc),
+            "/blob" => self.handle_blob(&inc),
             _ => Err((404, "not found".to_string())),
         };
         match result {
@@ -621,9 +678,23 @@ impl<R: Runtime> Sync<R> {
         if changed {
             self.log("info", format!("Received changes from {}", req.from.name));
         }
+        if !self.missing_blobs().is_empty() {
+            // Fetch the images by syncing back with the sender shortly.
+            self.trigger(Trigger::Peer(req.from.id.clone()));
+        }
         self.emit_status();
         let resp = SyncResponse { from: self.me(), peers: self.known_peers(), digest, doc: out_doc };
         crypto::seal(&key, "/sync", &resp).map_err(|e| (500, e))
+    }
+
+    fn handle_blob(&self, inc: &net::Incoming) -> Result<Vec<u8>, (u16, String)> {
+        let key = self.group_key().ok_or((409, "not paired".to_string()))?;
+        let req: net::BlobRequest =
+            crypto::open(&key, "/blob", &inc.body).map_err(|_| (401, "not in this sync group".to_string()))?;
+        let bytes = self.blobs.read(&req.hash, &req.ext).ok_or((404, "image not found".to_string()))?;
+        use base64::Engine;
+        let resp = net::BlobResponse { data: base64::engine::general_purpose::STANDARD.encode(bytes) };
+        crypto::seal(&key, "/blob", &resp).map_err(|e| (500, e))
     }
 
     fn handle_pair(&self, inc: &net::Incoming) -> Result<Vec<u8>, (u16, String)> {
@@ -863,6 +934,7 @@ fn start<R: Runtime>(app: &AppHandle<R>, dir: PathBuf, store_path: PathBuf) -> R
     let (tx, rx) = mpsc::channel();
     let sync = Arc::new(Sync {
         app: app.clone(),
+        blobs: blobs::Blobs::new(dir.join("blobs")),
         dir,
         store_path,
         cfg: Mutex::new(cfg.clone()),
@@ -1102,6 +1174,48 @@ mod e2e {
         let known: Vec<String> = tablet.sync.status().peers.iter().map(|p| p.name.clone()).collect();
         assert!(known.contains(&"PC".to_string()), "{known:?}");
         assert_eq!(titles(&tablet), vec!["work"]);
+    }
+
+    #[test]
+    fn background_image_syncs_and_is_never_erased() {
+        let pc = node("PC", json!([board("work", "a")]));
+        // The phone stores "no background" as null, which must not win.
+        let mut phone_board = board("work", "a");
+        phone_board["background"] = Value::Null;
+        let phone = node("Phone", json!([phone_board]));
+        let code = pc.sync.start_pairing().unwrap().code;
+        phone.sync.join(&code).unwrap();
+        phone.sync.run_all(true).unwrap();
+
+        // PC picks a background picture from its disk.
+        let pic_dir = std::env::temp_dir().join(format!("kanri-pic-{}", crypto::random_id(6)));
+        std::fs::create_dir_all(&pic_dir).unwrap();
+        let pic = pic_dir.join("holiday.png");
+        std::fs::write(&pic, b"\x89PNG fake image").unwrap();
+        let mut d = pc.sync.read_store().unwrap();
+        d.boards[0]["background"] = json!({ "src": pic.to_string_lossy(), "blur": "4px", "brightness": "80%" });
+        pc.sync.write_store(&d).unwrap();
+
+        // Phone syncs: gets the setting and downloads the image itself.
+        phone.sync.run_all(true).unwrap();
+        let bg = phone.sync.read_store().unwrap().boards[0]["background"].clone();
+        let src = bg["src"].as_str().unwrap().to_string();
+        assert!(!src.is_empty(), "phone should have the image: {bg}");
+        assert_eq!(std::fs::read(&src).unwrap(), b"\x89PNG fake image");
+        assert_eq!(bg["blur"], json!("4px"));
+
+        // Syncing back and forth keeps the PC's own background.
+        pc.sync.run_all(true).unwrap();
+        phone.sync.run_all(true).unwrap();
+        let pc_bg = pc.sync.read_store().unwrap().boards[0]["background"].clone();
+        assert!(!pc_bg["src"].as_str().unwrap_or("").is_empty(), "PC background lost: {pc_bg}");
+
+        // Removing the background on the phone removes it everywhere.
+        let mut d = phone.sync.read_store().unwrap();
+        d.boards[0].as_object_mut().unwrap().remove("background");
+        phone.sync.write_store(&d).unwrap();
+        phone.sync.run_all(true).unwrap();
+        assert!(pc.sync.read_store().unwrap().boards[0].get("background").is_none());
     }
 
     #[test]

@@ -29,7 +29,11 @@ Windows PC, Galaxy S22/S26 phone and Galaxy Tab. No cloud, no server. User-facin
 - `src-tauri/src/sync/`: Rust sync engine
   - `doc.rs`: replicated model. Boards are flattened to board/column/card entities with LWW
     registers (body, parent, child order) + tombstones; merge is commutative/idempotent.
-    `lastEdited` and `background` are **device-local** (excluded from sync on purpose).
+    `lastEdited` is device-local. Backgrounds sync in a portable form (see `blobs.rs`).
+  - `blobs.rs`: background images are copied into `sync/blobs/<sha256>.<ext>` and synced by
+    hash; missing images are fetched from peers via `/blob`. `null` background == no key, so a
+    device's "none" never overwrites another's picture. UI never deletes a background whose file
+    is missing (`useBackgroundImage` `mutateBoardOnMissingFile=false`).
   - `crypto.rs`: XChaCha20-Poly1305; group key shared via one-time QR pairing token.
   - `net.rs`: tiny_http server on port 47613 + ureq client; pairing code format `kanrisync1:...`.
   - `discovery.rs`: mDNS `_kanrisync._tcp` with hashed group tag.

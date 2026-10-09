@@ -53,6 +53,18 @@ pub struct SyncResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct BlobRequest {
+    pub hash: String,
+    pub ext: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BlobResponse {
+    /// Base64 image bytes.
+    pub data: String,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct PairRequest {
     pub device: DeviceInfo,
 }

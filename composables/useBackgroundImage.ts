@@ -44,7 +44,9 @@ export function useBackgroundImage(
 ) {
   const {
     checkFileExists = true,
-    mutateBoardOnMissingFile = true,
+    // Kanri Sync: never delete the setting just because the image file is
+    // missing here (e.g. still being transferred from another device).
+    mutateBoardOnMissingFile = false,
     syncBoardOnSetters = true,
     computeTitleColor = true,
   } = options;
@@ -105,6 +107,12 @@ export function useBackgroundImage(
 
     const background = boardContent.value.background;
     bgCustomNoResolution.value = background.src;
+
+    // Synced background whose image has not arrived on this device yet.
+    if (!background.src) {
+      bgImageLoaded.value = true;
+      return;
+    }
 
     let bgImageExists = true;
     if (checkFileExists) {

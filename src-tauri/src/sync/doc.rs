@@ -197,10 +197,7 @@ fn flatten(data: &StoreData) -> BTreeMap<String, Flat> {
             let cols = body.remove("columns");
             // lastEdited changes on every card edit; it is derived on rebuild.
             body.remove("lastEdited");
-            // Background images are files on this device's disk; their paths
-            // mean nothing elsewhere (and a device that cannot find the file
-            // clears the setting), so backgrounds stay per-device.
-            body.remove("background");
+            // Backgrounds arrive here in portable form (see blobs.rs).
             let mut col_order = Vec::new();
             if let Some(Value::Array(cols)) = cols {
                 for c in cols {
@@ -378,17 +375,13 @@ impl SyncDoc {
 
     /// Rebuilds Kanri's nested store layout from the merged entities.
     pub fn render(&self, previous: &StoreData) -> StoreData {
-        // Keep device-local fields (lastEdited, background) from the local copy.
+        // Keep the device-local lastEdited from the local copy.
         let mut last_edited: BTreeMap<String, Value> = BTreeMap::new();
-        let mut background: BTreeMap<String, Value> = BTreeMap::new();
         if let Value::Array(bs) = &previous.boards {
             for b in bs {
                 let Some(id) = b.get("id").and_then(Value::as_str) else { continue };
                 if let Some(le) = b.get("lastEdited") {
                     last_edited.insert(id.to_string(), le.clone());
-                }
-                if let Some(bg) = b.get("background") {
-                    background.insert(id.to_string(), bg.clone());
                 }
             }
         }
@@ -427,9 +420,7 @@ impl SyncDoc {
             if let Some(le) = last_edited.get(bid) {
                 board.insert("lastEdited".into(), le.clone());
             }
-            if let Some(bg) = background.get(bid) {
-                board.insert("background".into(), bg.clone());
-            }
+
             out.push(Value::Object(board));
         }
 
@@ -640,24 +631,6 @@ mod tests {
         let mut d = base();
         d.boards[0]["lastEdited"] = json!("2026-01-01T00:00:00.000Z");
         assert!(!a.stamp(&d, &mut ca, 5000));
-    }
-
-    #[test]
-    fn backgrounds_stay_per_device() {
-        let (mut a, mut ca, mut b, mut cb) = pair();
-        // PC sets a background image (a local file path).
-        let mut pc = base();
-        pc.boards[0]["background"] = json!({"src": "C:/Users/me/bg.png", "blur": "8px", "brightness": "100%"});
-        assert!(!a.stamp(&pc, &mut ca, 2000), "background alone is not a synced change");
-        // Phone cannot find the file and clears it.
-        let mut phone = base();
-        phone.boards[0]["background"] = Value::Null;
-        b.stamp(&phone, &mut cb, 2001);
-        a.merge(&b);
-        b.merge(&a);
-        // Each device keeps its own background after syncing.
-        assert_eq!(a.render(&pc).boards[0]["background"]["src"], json!("C:/Users/me/bg.png"));
-        assert_eq!(b.render(&phone).boards[0]["background"], Value::Null);
     }
 
     #[test]

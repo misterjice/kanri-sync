@@ -90,7 +90,7 @@ Boards, columns and cards are synced individually, not as one big file, so:
 | Synced | Not synced (per device) |
 |---|---|
 | Boards, columns, cards, descriptions, checklists, tags, due dates, pins | Theme, language, zoom and other settings |
-| Board background *settings* | Background *image files* (they live on each device's disk) |
+| Board background pictures (set them on the PC; the image is copied to the other devices) | |
 
 ## Limits worth knowing
 
